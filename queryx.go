@@ -94,8 +94,9 @@ type Queryx struct {
 	Names  []string
 	Mapper *reflectx.Mapper
 
-	tr  Transformer
-	err error
+	unsafe bool
+	tr     Transformer
+	err    error
 }
 
 // Query creates a new Queryx from gocql.Query using a default mapper.
@@ -210,8 +211,12 @@ func (q *Queryx) bindMapArgs(arg map[string]interface{}) ([]interface{}, error) 
 // Bind sets query arguments of query. This can also be used to rebind new query arguments
 // to an existing query instance.
 func (q *Queryx) Bind(v ...interface{}) *Queryx {
-	q.Query.Bind(udtWrapSlice(q.Mapper, DefaultUnsafe, v)...)
+	q.Query.Bind(udtWrapSlice(q.Mapper, q.unsafe, v)...)
 	return q
+}
+
+func (q *Queryx) Scan(v ...interface{}) error {
+	return q.Query.Scan(udtWrapSlice(q.Mapper, q.unsafe, v)...)
 }
 
 // Err returns any binding errors.
@@ -336,6 +341,11 @@ func (q *Queryx) SelectRelease(dest interface{}) error {
 	return q.Select(dest)
 }
 
+func (q *Queryx) Unsafe() *Queryx {
+	q.unsafe = true
+	return q
+}
+
 // Iter returns Iterx instance for the query. It should be used when data is too
 // big to be loaded with Select in order to do row by row iteration.
 // See Iterx StructScan function.
@@ -343,6 +353,6 @@ func (q *Queryx) Iter() *Iterx {
 	return &Iterx{
 		Iter:   q.Query.Iter(),
 		Mapper: q.Mapper,
-		unsafe: DefaultUnsafe,
+		unsafe: q.unsafe,
 	}
 }

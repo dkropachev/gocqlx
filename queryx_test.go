@@ -55,7 +55,7 @@ func TestCompileQuery(t *testing.T) {
 			t.Error(err)
 		}
 		if qr != test.R {
-			t.Error("expected", test.R, "got", qr)
+			t.Error("expectedOnDB", test.R, "got", qr)
 		}
 		if diff := cmp.Diff(names, test.V); diff != "" {
 			t.Error("names mismatch", diff)

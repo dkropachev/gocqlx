@@ -13,10 +13,6 @@ import (
 	"github.com/scylladb/go-reflectx"
 )
 
-// DefaultUnsafe enables the behavior of forcing the iterator to ignore
-// missing fields for all queries. See Unsafe below for more information.
-var DefaultUnsafe bool
-
 // Iterx is a wrapper around gocql.Iter which adds struct scanning capabilities.
 type Iterx struct {
 	*gocql.Iter
@@ -206,9 +202,9 @@ func (iter *Iterx) scanAll(dest interface{}) bool {
 
 // isScannable takes the reflect.Type and the actual dest value and returns
 // whether or not it's Scannable. t is scannable if:
-//   * ptr to t implements gocql.Unmarshaler, gocql.UDTUnmarshaler or UDT
-//   * it is not a struct
-//   * it has no exported fields
+//   - ptr to t implements gocql.Unmarshaler, gocql.UDTUnmarshaler or UDT
+//   - it is not a struct
+//   - it has no exported fields
 func (iter *Iterx) isScannable(t reflect.Type) bool {
 	ptr := reflect.PtrTo(t)
 	switch {
