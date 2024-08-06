@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 	"github.com/google/go-cmp/cmp"
 )
 

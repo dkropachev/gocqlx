@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"gopkg.in/inf.v0"

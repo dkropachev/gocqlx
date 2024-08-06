@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/inf.v0"
 

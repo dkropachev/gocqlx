@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 	"github.com/scylladb/go-reflectx"
 )
 

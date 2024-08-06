@@ -10,7 +10,7 @@ package gocqlx_test
 import (
 	"testing"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/scylladb/gocqlx/v3"

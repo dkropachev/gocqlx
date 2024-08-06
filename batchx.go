@@ -3,7 +3,7 @@ package gocqlx
 import (
 	"fmt"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 )
 
 // Batch is a wrapper around gocql.Batch

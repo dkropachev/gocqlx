@@ -15,7 +15,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 
 	"github.com/scylladb/gocqlx/v3"
 	_ "github.com/scylladb/gocqlx/v3/table"
@@ -124,8 +124,8 @@ func renderTemplate(md *gocql.KeyspaceMetadata) ([]byte, error) {
 			if c.Type == "decimal" && !existsInSlice(imports, "gopkg.in/inf.v0") {
 				imports = append(imports, "gopkg.in/inf.v0")
 			}
-			if c.Type == "duration" && !existsInSlice(imports, "github.com/gocql/gocql") {
-				imports = append(imports, "github.com/gocql/gocql")
+			if c.Type == "duration" && !existsInSlice(imports, "github.com/dkropachev/gocql") {
+				imports = append(imports, "github.com/dkropachev/gocql")
 			}
 		}
 	}

@@ -7,7 +7,7 @@ package gocqlx
 import (
 	"reflect"
 
-	"github.com/gocql/gocql"
+	"github.com/dkropachev/gocql"
 )
 
 // Transformer transforms the value of the named parameter to another value.
