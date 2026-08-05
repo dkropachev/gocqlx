@@ -7,6 +7,7 @@ package migrate
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -163,25 +164,36 @@ func FromFS(ctx context.Context, session gocqlx.Session, f fs.FS) error {
 		return fmt.Errorf("list migrations: %w", err)
 	}
 	if len(fm) == 0 {
-		return fmt.Errorf("no migration files found")
+		return &NoMigrationsError{Pattern: "*.cql"}
 	}
 	sort.Strings(fm)
 
 	// verify migrations
 	if len(dbm) > len(fm) {
-		return fmt.Errorf("database is ahead")
+		return &DatabaseAheadError{
+			Applied:   len(dbm),
+			Available: len(fm),
+		}
 	}
 
 	for i := 0; i < len(dbm); i++ {
 		if dbm[i].Name != fm[i] {
-			return fmt.Errorf("inconsistent migrations found, expected %q got %q at %d", dbm[i].Name, fm[i], i)
+			return &InconsistentMigrationError{
+				Expected: dbm[i].Name,
+				Actual:   fm[i],
+				Index:    i,
+			}
 		}
 		c, err := fileChecksum(f, fm[i])
 		if err != nil {
-			return fmt.Errorf("calculate checksum for %q: %s", fm[i], err)
+			return fmt.Errorf("calculate checksum for %q: %w", fm[i], err)
 		}
 		if dbm[i].Checksum != c {
-			return fmt.Errorf("file %q was tampered with, expected md5 %s", fm[i], dbm[i].Checksum)
+			return &ChecksumMismatchError{
+				Path:     fm[i],
+				Expected: dbm[i].Checksum,
+				Actual:   c,
+			}
 		}
 	}
 
@@ -312,9 +324,17 @@ func applyMigration(ctx context.Context, session gocqlx.Session, f fs.FS, path s
 		if cb := isCallback(stmt); cb != "" {
 			// Handle callback commands (e.g., "-- CALL function_name;")
 			if Callback == nil {
-				return fmt.Errorf("statement %d: missing callback handler while trying to call %s", i, cb)
+				return &MissingCallbackHandlerError{Name: cb, Statement: i}
 			}
 			if err := Callback(operationCtx, session, CallComment, cb); err != nil {
+				var missing *MissingCallbackHandlerError
+				if errors.As(err, &missing) {
+					return &MissingCallbackHandlerError{
+						Name:      missing.Name,
+						Statement: i,
+						cause:     err,
+					}
+				}
 				return fmt.Errorf("callback %s: %w", cb, err)
 			}
 		} else if stmt != "" && !isComment(stmt) {
@@ -334,7 +354,7 @@ func applyMigration(ctx context.Context, session gocqlx.Session, f fs.FS, path s
 		}
 	}
 	if i == 0 {
-		return fmt.Errorf("no migration statements found in %q", info.Name)
+		return &NoMigrationStatementsError{Path: info.Name}
 	}
 
 	if Callback != nil && i > done {
