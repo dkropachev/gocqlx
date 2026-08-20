@@ -6,7 +6,8 @@ package qb
 
 import (
 	"bytes"
-	"strconv"
+
+	"github.com/gocql/gocql"
 )
 
 // value is a CQL value expression for use in an initializer, assignment,
@@ -25,7 +26,7 @@ func (p param) writeCql(cql *bytes.Buffer) (names []string) {
 	return []string{string(p)}
 }
 
-// param is a named CQL tuple '?' parameter.
+// tupleParam is a named CQL tuple '?' parameter.
 type tupleParam struct {
 	param param
 	count int
@@ -37,11 +38,11 @@ func (t tupleParam) writeCql(cql *bytes.Buffer) (names []string) {
 	for i := 0; i < t.count-1; i++ {
 		cql.WriteByte('?')
 		cql.WriteByte(',')
-		names = append(names, baseName+"["+strconv.Itoa(i)+"]")
+		names = append(names, gocql.TupleColumnName(baseName, i))
 	}
 	cql.WriteByte('?')
 	cql.WriteByte(')')
-	names = append(names, baseName+"["+strconv.Itoa(t.count-1)+"]")
+	names = append(names, gocql.TupleColumnName(baseName, t.count-1))
 
 	return
 }

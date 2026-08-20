@@ -22,6 +22,9 @@ var DefaultBindTransformer Transformer
 // It helps to avoid tombstones when using the same insert/update
 // statement for filled and partially filled named parameters.
 var UnsetEmptyTransformer = func(name string, val interface{}) interface{} {
+	if val == nil {
+		return nil
+	}
 	v := reflect.ValueOf(val)
 	if v.IsZero() {
 		return gocql.UnsetValue
